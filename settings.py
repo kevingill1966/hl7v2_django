@@ -160,14 +160,22 @@ LOGGING = {
 }
 
 # THIS IS THE CONFIGURATION FOR THE HL7 LISTENERS
-
-MLLPSOCKETS = {
-    'default': {
-        'send_addr': '0.0.0.0:9001',
+# The default receive address is normally used. However, you coult
+# select another on the command line.
+MLLP_SOCKETS = [
+    {
+        'recv_addr': '0.0.0.0:9001',
+        'mllp_ack': False,
+    },
+    {
         'recv_addr': '0.0.0.0:9000',
         'mllp_ack': False,
-    }
-}
+    },
+    {
+        'recv_addr': '0.0.0.0:9002',
+        'mllp_ack': False,
+    },
+]
 
 # This should be similar to the URL concept in Django for
 # dispatching request messages.
