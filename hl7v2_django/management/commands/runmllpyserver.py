@@ -86,7 +86,7 @@ class LLPServer(object):
         # Search for the SOF
         sof = buffer.find(LLP_SB)
         if sof < 0:
-            logger.error('NO Start Byte found in message buffer %s', buffer)
+            logger.error('ERROR: No start byte found in message buffer\n%s', buffer.replace(CR, '\n'))
             return buffer
 
         buffer = buffer[sof+1:]
@@ -160,7 +160,7 @@ class LLPServer(object):
                     if fileno in send_connections:
                         frame = self._read_frame(send_connections[fileno])
                         if frame in [LLP_NAK, LLP_ACK]:
-                            logger.debug('ACK recieved from send socket: %s', frame)
+                            logger.debug('ACK recieved from send socket: %s', frame.replace(CR, '\n'))
                         elif frame is None:
                             self.epoll.unregister(fileno)
                             send_connections[fileno].close()
@@ -172,7 +172,7 @@ class LLPServer(object):
                     if fileno in recv_connections:
                         frame = self._read_frame(recv_connections[fileno])
                         if frame in [LLP_NAK, LLP_ACK]:
-                            logger.debug('ACK recieved from send socket: %s', frame)
+                            logger.debug('ACK recieved from send socket: %s', frame.replace(CR, '\n'))
                         elif frame is None:
                             self.epoll.unregister(fileno)
                             recv_connections[fileno].close()
