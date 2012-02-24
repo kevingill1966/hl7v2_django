@@ -1,6 +1,7 @@
 """
     Master File Notification messages (Chapter 8)
 """
+
 from hl7v2_django import responses
 
 def m02(request, *args, **kwargs):  # practitioner

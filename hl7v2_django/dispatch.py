@@ -9,6 +9,7 @@ import re
 from django.conf import settings
 from django.core.urlresolvers import get_callable
 from django.utils.importlib import import_module
+from django.db import transaction
 
 from hl7v2_django import responses
 
@@ -38,7 +39,8 @@ class pattern(object):
     def callback(self, request, args, kwargs):
         if self._view is None:
             self._view = get_callable(self.view)
-        return self._view(request, *args, **kwargs)
+        with transaction.commit_on_success():
+            return self._view(request, *args, **kwargs)
 
 
 class Dispatcher(object):

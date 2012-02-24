@@ -5,15 +5,18 @@
     and the carriage return.
 """ 
 
-from django.core.management.base import BaseCommand
-from django.conf import settings
 
 
 import socket
 import select
 import logging
+from optparse import make_option
 
 import hl7
+
+from django.core.management.base import BaseCommand
+from django.conf import settings
+
 from hl7v2_django import responses
 from hl7v2_django.dispatch import Dispatcher
 
@@ -202,9 +205,17 @@ class Command(BaseCommand):
     args = 'runmllpserver'
     help = """Run a server communicating with a HL7 server to dispatch messages.
 
-        Usage:\n\n\tdjango [options] runmllpserver
+        Usage:\n\n\tdjango [options] runmllpserver [--pdb]
 
+        --pdb for postmortem debugger
         """ 
+    option_list = BaseCommand.option_list + (
+        make_option('--pdb',
+            action='store_true',
+            dest='postmortem',
+            default=False,
+            help='Post mortem debugger on error'),
+        )
 
     def handle(self, *args, **options):
         config = settings.MLLPSOCKETS['default']
@@ -214,11 +225,14 @@ class Command(BaseCommand):
 
         server = LLPServer(recv_addr, send_addr, mllp_ack)
         self.dispatcher = Dispatcher()
-        try:
+        if options['postmortem']:
+            try:
+                server.dispatch(self.recv_handler)
+            except:
+                import pdb; pdb.post_mortem()
+                raise
+        else:
             server.dispatch(self.recv_handler)
-        except:
-            import pdb; pdb.post_mortem()
-            raise
 
 
     def recv_handler(self, msg, server, connection):

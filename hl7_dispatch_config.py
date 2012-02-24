@@ -21,5 +21,6 @@ from hl7v2_django.dispatch import pattern
 rules = [
     pattern('MFN\^M05/.*', 'sd.mfn_handlers.m05'),  # staff
     pattern('MFN\^M02/.*', 'sd.mfn_handlers.m02'),  # practitioner
+    pattern('^.*', 'sd.mfn_handlers.m02'),  # TEST
 ]
 
