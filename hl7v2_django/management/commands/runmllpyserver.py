@@ -11,6 +11,7 @@ import socket
 import select
 import logging
 from optparse import make_option
+import pdb
 
 import hl7
 
@@ -217,6 +218,8 @@ class Command(BaseCommand):
             help='Post mortem debugger on error'),
         )
 
+    postmortem = False
+
     def handle(self, *args, **options):
         config = settings.MLLPSOCKETS['default']
         send_addr = config['send_addr']
@@ -227,9 +230,10 @@ class Command(BaseCommand):
         self.dispatcher = Dispatcher()
         if options['postmortem']:
             try:
+                self.postmortem = True
                 server.dispatch(self.recv_handler)
             except:
-                import pdb; pdb.post_mortem()
+                pdb.post_mortem()
                 raise
         else:
             server.dispatch(self.recv_handler)
@@ -246,6 +250,8 @@ class Command(BaseCommand):
             msg = hl7.parse(msg)
         except:
             logger.exception('Error parsing message')
+            if self.postmortem:
+                pdb.post_mortem()
             resp = responses.hl7NAK('AE', 'UNABLE TO PARSE REQUEST')
             logger.debug('SEND: %s', unicode(resp).replace(CR, '\n'))
             server._write_frame(connection, unicode(resp).encode('utf-8'))
@@ -261,6 +267,8 @@ class Command(BaseCommand):
             return
         except:
             logger.exception('Error dispatching message')
+            if self.postmortem:
+                pdb.post_mortem()
             resp = responses.hl7NAK('AE', 'INTERNAL ERROR PROCESSING REQUEST')
             logger.debug('SEND: %s', unicode(resp).replace(CR, '\n'))
             server._write_frame(connection, unicode(resp).encode('utf-8'))
